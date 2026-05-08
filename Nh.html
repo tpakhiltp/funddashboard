@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinPulse — Financial Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg: #0a0c10;
+--surface: #111318;
+--surface2: #181c24;
+--border: rgba(255,255,255,0.07);
+--gold: #d4a843;
+--gold-light: #f0c96b;
+--gold-dim: rgba(212,168,67,0.15);
+--emerald: #2dd4a0;
+--emerald-dim: rgba(45,212,160,0.12);
+--ruby: #f05c6e;
+--ruby-dim: rgba(240,92,110,0.12);
+--sapphire: #5c8ef0;
+--sapphire-dim: rgba(92,142,240,0.12);
+--violet: #a87cf0;
+--text: #e8eaf0;
+--text-muted: #6b7280;
+--text-dim: #9ca3af;
+}
+
+• { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Background texture */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background:
+radial-gradient(ellipse 80% 60% at 20% 10%, rgba(212,168,67,0.04) 0%, transparent 60%),
+radial-gradient(ellipse 60% 40% at 80% 80%, rgba(92,142,240,0.05) 0%, transparent 60%);
+pointer-events: none;
+z-index: 0;
+}
+
+.app { position: relative; z-index: 1; display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+width: 240px;
+background: var(–surface);
+border-right: 1px solid var(–border);
+display: flex;
+flex-direction: column;
+padding: 28px 0;
+position: fixed;
+top: 0; left: 0; bottom: 0;
+z-index: 100;
+}
+
+.logo {
+padding: 0 24px 32px;
+border-bottom: 1px solid var(–border);
+}
+
+.logo-text {
+font-family: ‘Playfair Display’, serif;
+font-size: 22px;
+font-weight: 900;
+color: var(–gold);
+letter-spacing: -0.5px;
+}
+
+.logo-sub {
+font-size: 10px;
+color: var(–text-muted);
+letter-spacing: 2px;
+text-transform: uppercase;
+margin-top: 2px;
+}
+
+.nav {
+flex: 1;
+padding: 20px 12px;
+display: flex;
+flex-direction: column;
+gap: 2px;
+}
+
+.nav-section {
+font-size: 9px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: var(–text-muted);
+padding: 14px 12px 6px;
+font-weight: 600;
+}
+
+.nav-item {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 12px;
+border-radius: 8px;
+cursor: pointer;
+font-size: 13.5px;
+font-weight: 400;
+color: var(–text-dim);
+transition: all 0.2s;
+position: relative;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.04); color: var(–text); }
+
+.nav-item.active {
+background: var(–gold-dim);
+color: var(–gold-light);
+font-weight: 500;
+}
+
+.nav-item.active::before {
+content: ‘’;
+position: absolute;
+left: 0; top: 50%;
+transform: translateY(-50%);
+width: 3px; height: 20px;
+background: var(–gold);
+border-radius: 0 2px 2px 0;
+}
+
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+.nav-badge {
+margin-left: auto;
+background: var(–ruby-dim);
+color: var(–ruby);
+font-size: 10px;
+font-weight: 600;
+padding: 1px 7px;
+border-radius: 20px;
+}
+
+.sidebar-footer {
+padding: 16px 12px;
+border-top: 1px solid var(–border);
+}
+
+.user-card {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 12px;
+border-radius: 8px;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.user-card:hover { background: rgba(255,255,255,0.04); }
+
+.avatar {
+width: 32px; height: 32px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(–gold), var(–violet));
+display: flex; align-items: center; justify-content: center;
+font-size: 13px; font-weight: 700; color: #000;
+flex-shrink: 0;
+}
+
+.user-info { flex: 1; overflow: hidden; }
+.user-name { font-size: 12.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 10.5px; color: var(–text-muted); }
+
+/* MAIN */
+.main {
+margin-left: 240px;
+flex: 1;
+padding: 32px 36px;
+display: flex;
+flex-direction: column;
+gap: 28px;
+}
+
+/* TOPBAR */
+.topbar {
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.page-title {
+font-family: ‘Playfair Display’, serif;
+font-size: 28px;
+font-weight: 700;
+color: var(–text);
+letter-spacing: -0.5px;
+}
+
+.page-subtitle { font-size: 13px; color: var(–text-muted); margin-top: 3px; }
+
+.topbar-right {
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.period-select {
+background: var(–surface);
+border: 1px solid var(–border);
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 13px;
+padding: 8px 14px;
+border-radius: 8px;
+cursor: pointer;
+appearance: none;
+padding-right: 28px;
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘12’ viewBox=‘0 0 24 24’ fill=‘none’ stroke=’%236b7280’ stroke-width=‘2’%3E%3Cpath d=‘M6 9l6 6 6-6’/%3E%3C/svg%3E”);
+background-repeat: no-repeat;
+background-position: right 10px center;
+transition: border-color 0.2s;
+}
+
+.period-select:focus { outline: none; border-color: var(–gold); }
+
+.btn {
+display: flex; align-items: center; gap: 7px;
+padding: 9px 18px;
+border-radius: 8px;
+font-family: ‘DM Sans’, sans-serif;
+font-size: 13px;
+font-weight: 500;
+cursor: pointer;
+border: none;
+transition: all 0.2s;
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(–gold), #e8b840);
+color: #000;
+}
+
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,168,67,0.3); }
+
+.btn-ghost {
+background: var(–surface);
+color: var(–text-dim);
+border: 1px solid var(–border);
+}
+
+.btn-ghost:hover { background: var(–surface2); color: var(–text); }
+
+/* KPI CARDS */
+.kpi-grid {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 16px;
+}
+
+.kpi-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 14px;
+padding: 22px 24px;
+position: relative;
+overflow: hidden;
+cursor: pointer;
+transition: all 0.25s;
+}
+
+.kpi-card::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 2px;
+}
+
+.kpi-card.gold::before { background: linear-gradient(90deg, var(–gold), var(–gold-light)); }
+.kpi-card.emerald::before { background: linear-gradient(90deg, var(–emerald), #7fffd4); }
+.kpi-card.ruby::before { background: linear-gradient(90deg, var(–ruby), #ff8a95); }
+.kpi-card.sapphire::before { background: linear-gradient(90deg, var(–sapphire), #90b4ff); }
+
+.kpi-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.12); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+
+.kpi-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+
+.kpi-icon {
+width: 40px; height: 40px;
+border-radius: 10px;
+display: flex; align-items: center; justify-content: center;
+font-size: 18px;
+}
+
+.kpi-card.gold .kpi-icon { background: var(–gold-dim); }
+.kpi-card.emerald .kpi-icon { background: var(–emerald-dim); }
+.kpi-card.ruby .kpi-icon { background: var(–ruby-dim); }
+.kpi-card.sapphire .kpi-icon { background: var(–sapphire-dim); }
+
+.kpi-badge {
+font-size: 11px;
+font-weight: 600;
+padding: 3px 9px;
+border-radius: 20px;
+display: flex; align-items: center; gap: 3px;
+}
+
+.badge-up { background: rgba(45,212,160,0.12); color: var(–emerald); }
+.badge-down { background: rgba(240,92,110,0.12); color: var(–ruby); }
+
+.kpi-label { font-size: 11.5px; color: var(–text-muted); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; }
+.kpi-value { font-family: ‘Playfair Display’, serif; font-size: 30px; font-weight: 700; color: var(–text); margin: 4px 0 2px; letter-spacing: -1px; }
+.kpi-sub { font-size: 11.5px; color: var(–text-muted); }
+
+/* CHART ROW */
+.chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+
+.card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 14px;
+padding: 24px;
+}
+
+.card-header {
+display: flex; align-items: center; justify-content: space-between;
+margin-bottom: 22px;
+}
+
+.card-title { font-family: ‘Playfair Display’, serif; font-size: 16px; font-weight: 700; }
+.card-sub { font-size: 12px; color: var(–text-muted); margin-top: 2px; }
+
+.legend {
+display: flex; gap: 14px; align-items: center;
+}
+
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(–text-dim); cursor: pointer; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* SVG CHART */
+.chart-svg { width: 100%; overflow: visible; }
+
+/* MONTH BARS */
+.bar-chart-wrap { position: relative; }
+
+.bar-group { display: flex; align-items: flex-end; gap: 4px; }
+
+/* Donut chart */
+.donut-wrap { display: flex; flex-direction: column; align-items: center; }
+.donut-center {
+text-align: center;
+margin-top: -20px;
+pointer-events: none;
+}
+
+/* TABLE ROW */
+.table-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+
+/* Salary table */
+.salary-table { width: 100%; border-collapse: collapse; }
+.salary-table th {
+font-size: 10.5px;
+text-transform: uppercase;
+letter-spacing: 0.8px;
+color: var(–text-muted);
+font-weight: 600;
+padding: 0 0 12px;
+text-align: left;
+border-bottom: 1px solid var(–border);
+}
+
+.salary-table td {
+padding: 12px 0;
+font-size: 13.5px;
+border-bottom: 1px solid rgba(255,255,255,0.04);
+vertical-align: middle;
+}
+
+.salary-table tr:last-child td { border-bottom: none; }
+
+.emp-name { font-weight: 500; }
+.emp-dept { font-size: 11px; color: var(–text-muted); margin-top: 2px; }
+
+.status-badge {
+font-size: 10.5px;
+font-weight: 600;
+padding: 3px 9px;
+border-radius: 20px;
+display: inline-block;
+}
+
+.status-paid { background: var(–emerald-dim); color: var(–emerald); }
+.status-pending { background: rgba(212,168,67,0.12); color: var(–gold); }
+.status-processing { background: var(–sapphire-dim); color: var(–sapphire); }
+
+.amount-pos { color: var(–emerald); font-family: ‘DM Mono’, monospace; font-size: 13px; font-weight: 500; }
+.amount-neg { color: var(–ruby); font-family: ‘DM Mono’, monospace; font-size: 13px; font-weight: 500; }
+
+/* Progress bars */
+.progress-list { display: flex; flex-direction: column; gap: 18px; margin-top: 4px; }
+.progress-item {}
+.progress-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+.progress-label { font-size: 13px; font-weight: 500; }
+.progress-pct { font-family: ‘DM Mono’, monospace; font-size: 12px; color: var(–text-muted); }
+.progress-track {
+height: 6px;
+background: rgba(255,255,255,0.06);
+border-radius: 10px;
+overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; background: rgba(255,255,255,0.04); padding: 4px; border-radius: 10px; }
+.tab {
+padding: 6px 14px;
+border-radius: 7px;
+font-size: 12.5px;
+font-weight: 500;
+cursor: pointer;
+color: var(–text-muted);
+transition: all 0.2s;
+border: none;
+background: none;
+font-family: ‘DM Sans’, sans-serif;
+}
+.tab.active { background: var(–surface2); color: var(–text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.tab:hover:not(.active) { color: var(–text-dim); }
+
+/* SPARKLINE */
+.sparkline-row { display: flex; align-items: center; gap: 8px; }
+.sparkline-up { color: var(–emerald); }
+.sparkline-down { color: var(–ruby); }
+
+/* BOTTOM ROW */
+.bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+.mini-stat {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 14px;
+padding: 20px 22px;
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
+.mini-stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(–text-muted); font-weight: 600; }
+.mini-stat-value { font-family: ‘Playfair Display’, serif; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+.mini-stat-footer { font-size: 11.5px; color: var(–text-muted); display: flex; align-items: center; gap: 5px; }
+
+.dot-online { width: 6px; height: 6px; border-radius: 50%; background: var(–emerald); animation: pulse 2s infinite; }
+
+@keyframes pulse {
+0%, 100% { opacity: 1; transform: scale(1); }
+50% { opacity: 0.5; transform: scale(1.4); }
+}
+
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(16px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.kpi-card { animation: fadeUp 0.5s both; }
+.kpi-card:nth-child(1) { animation-delay: 0.05s; }
+.kpi-card:nth-child(2) { animation-delay: 0.10s; }
+.kpi-card:nth-child(3) { animation-delay: 0.15s; }
+.kpi-card:nth-child(4) { animation-delay: 0.20s; }
+.card { animation: fadeUp 0.5s both; animation-delay: 0.25s; }
+
+@media (max-width: 1200px) {
+.kpi-grid { grid-template-columns: repeat(2, 1fr); }
+.chart-row, .table-row, .bottom-row { grid-template-columns: 1fr; }
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+
+<nav class="sidebar">
+<div class="logo">
+<div class="logo-text">FinPulse</div>
+<div class="logo-sub">Financial Intelligence</div>
+</div>
+<div class="nav">
+<div class="nav-section">Overview</div>
+<div class="nav-item active"><span class="nav-icon">◈</span> Dashboard</div>
+<div class="nav-item"><span class="nav-icon">◉</span> Analytics</div>
+<div class="nav-section">Finance</div>
+<div class="nav-item"><span class="nav-icon">💼</span> Salary</div>
+<div class="nav-item"><span class="nav-icon">📊</span> Expenses<span class="nav-badge">4</span></div>
+<div class="nav-item"><span class="nav-icon">💰</span> Income</div>
+<div class="nav-item"><span class="nav-icon">📈</span> Forecasts</div>
+<div class="nav-section">People</div>
+<div class="nav-item"><span class="nav-icon">👥</span> Employees</div>
+<div class="nav-item"><span class="nav-icon">🏢</span> Departments</div>
+<div class="nav-section">Reports</div>
+<div class="nav-item"><span class="nav-icon">📋</span> Reports</div>
+<div class="nav-item"><span class="nav-icon">⚙️</span> Settings</div>
+</div>
+<div class="sidebar-footer">
+<div class="user-card">
+<div class="avatar">JD</div>
+<div class="user-info">
+<div class="user-name">James Dawson</div>
+<div class="user-role">Finance Director</div>
+</div>
+</div>
+</div>
+</nav>
+
+<!-- MAIN -->
+
+<main class="main">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div>
+    <div class="page-title">Financial Dashboard</div>
+    <div class="page-subtitle">May 2026 · All departments · Live data</div>
+  </div>
+  <div class="topbar-right">
+    <select class="period-select" id="periodSelect" onchange="updatePeriod(this.value)">
+      <option value="monthly">Monthly View</option>
+      <option value="quarterly">Quarterly View</option>
+      <option value="yearly">Yearly View</option>
+      <option value="ytd">Year-to-Date</option>
+    </select>
+    <button class="btn btn-ghost">⬇ Export</button>
+    <button class="btn btn-primary">+ New Entry</button>
+  </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="kpi-grid">
+  <div class="kpi-card gold">
+    <div class="kpi-top">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-badge badge-up">↑ 8.4%</div>
+    </div>
+    <div class="kpi-label">Total Income</div>
+    <div class="kpi-value" id="kpi-income">$`2.84M</div>
+    <div class="kpi-sub">vs `$2.62M last period</div>
+  </div>
+  <div class="kpi-card emerald">
+    <div class="kpi-top">
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-badge badge-up">↑ 3.1%</div>
+    </div>
+    <div class="kpi-label">Salary Expense</div>
+    <div class="kpi-value" id="kpi-salary">$`1.21M</div>
+    <div class="kpi-sub">142 active employees</div>
+  </div>
+  <div class="kpi-card ruby">
+    <div class="kpi-top">
+      <div class="kpi-icon">📉</div>
+      <div class="kpi-badge badge-down">↑ 5.2%</div>
+    </div>
+    <div class="kpi-label">Total Expenses</div>
+    <div class="kpi-value" id="kpi-expense">`$892K</div>
+    <div class="kpi-sub">Ops + overhead + misc</div>
+  </div>
+  <div class="kpi-card sapphire">
+    <div class="kpi-top">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-badge badge-up">↑ 12.7%</div>
+    </div>
+    <div class="kpi-label">Net Profit</div>
+    <div class="kpi-value" id="kpi-profit">$`737K</div>
+    <div class="kpi-sub">Margin: 25.9%</div>
+  </div>
+</div>
+
+<!-- CHART ROW -->
+<div class="chart-row">
+
+  <!-- Bar + Line Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Income vs Expenses</div>
+        <div class="card-sub">Monthly breakdown with trend overlay</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Income</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--ruby)"></div>Expenses</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--emerald)"></div>Salary</div>
+        </div>
+      </div>
+    </div>
+
+    <svg class="chart-svg" viewBox="0 0 620 220" id="mainChart">
+      <!-- Grid lines -->
+      <line x1="40" y1="10" x2="610" y2="10" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="40" y1="55" x2="610" y2="55" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="40" y1="100" x2="610" y2="100" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="40" y1="145" x2="610" y2="145" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+      <line x1="40" y1="190" x2="610" y2="190" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+
+      <!-- Y labels -->
+      <text x="35" y="14" fill="#6b7280" font-size="9" text-anchor="end" font-family="DM Mono">`$3M</text>
+      <text x="35" y="59" fill="#6b7280" font-size="9" text-anchor="end" font-family="DM Mono">$`2.5M</text>
+      <text x="35" y="104" fill="#6b7280" font-size="9" text-anchor="end" font-family="DM Mono">`$2M</text>
+      <text x="35" y="149" fill="#6b7280" font-size="9" text-anchor="end" font-family="DM Mono">$`1.5M</text>
+      <text x="35" y="194" fill="#6b7280" font-size="9" text-anchor="end" font-family="DM Mono">`$1M</text>
+
+      <!-- Bars (Income - gold) -->
+      <g id="barsIncome">
+        <rect x="50" y="40" width="22" height="150" rx="4" fill="var(--gold)" opacity="0.85"/>
+        <rect x="120" y="55" width="22" height="135" rx="4" fill="var(--gold)" opacity="0.85"/>
+        <rect x="190" y="30" width="22" height="160" rx="4" fill="var(--gold)" opacity="0.85"/>
+        <rect x="260" y="20" width="22" height="170" rx="4" fill="var(--gold)" opacity="0.85"/>
+        <rect x="330" y="45" width="22" height="145" rx="4" fill="var(--gold)" opacity="0.85"/>
+        <rect x="400" y="25" width="22" height="165" rx="4" fill="var(--gold)" opacity="0.85"/>
+        <rect x="470" y="15" width="22" height="175" rx="4" fill="var(--gold)" opacity="0.9"/>
+        <rect x="540" y="10" width="22" height="180" rx="4" fill="var(--gold-light)" opacity="0.95"/>
+      </g>
+
+      <!-- Bars (Expenses - ruby) -->
+      <g id="barsExp">
+        <rect x="75" y="100" width="22" height="90" rx="4" fill="var(--ruby)" opacity="0.7"/>
+        <rect x="145" y="110" width="22" height="80" rx="4" fill="var(--ruby)" opacity="0.7"/>
+        <rect x="215" y="95" width=
+
+
+</main>
+</div>
+
+<script>
+function setTab(el, label) {
+el.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+el.classList.add('active');
+}
+
+const periodData = {
+monthly: { income: '$2.84M', salary: '$1.21M', expense: '$892K', profit: '$737K' },
+quarterly: { income: '$8.12M', salary: '$3.54M', expense: '$2.71M', profit: '$1.87M' },
+yearly: { income: '$32.4M', salary: '$14.2M', expense: '$10.8M', profit: '$7.4M' },
+ytd: { income: '$11.9M', salary: '$5.08M', expense: '`$3.94M', profit: '$2.88M' }
+};
+
+function updatePeriod(val) {
+const d = periodData[val];
+document.getElementById('kpi-income').textContent = d.income;
+document.getElementById('kpi-salary').textContent = d.salary;
+document.getElementById('kpi-expense').textContent = d.expense;
+document.getElementById('kpi-profit').textContent = d.profit;
+}
+</script>
+
+</body>
+</html>
